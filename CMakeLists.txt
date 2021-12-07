@@ -20,3 +20,6 @@ add_executable(AoC_2021_day_5 day_5.cpp)
 
 configure_file(input_6 input_6 COPYONLY)
 add_executable(AoC_2021_day_6 day_6.cpp)
+
+configure_file(input_7 input_7 COPYONLY)
+add_executable(AoC_2021_day_7 day_7.cpp)
