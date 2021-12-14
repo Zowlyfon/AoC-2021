@@ -8,6 +8,7 @@
 #include <string>
 #include <algorithm>
 #include <regex>
+#include <sstream>
 
 struct bingoNumber {
     int value = 0;
