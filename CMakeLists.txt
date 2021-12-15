@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(AoC_2021)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 configure_file(input_1 input_1 COPYONLY)
 add_executable(AoC_2021_day_1 day_1.cpp)
@@ -40,3 +40,11 @@ add_executable(AoC_2021_day_11 day_11.cpp)
 configure_file(input_12 input_12 COPYONLY)
 configure_file(input_12_test input_12_test COPYONLY)
 add_executable(AoC_2021_day_12 day_12.cpp)
+
+configure_file(input_13 input_13 COPYONLY)
+configure_file(input_13_test input_13_test COPYONLY)
+add_executable(AoC_2021_day_13 day_13.cpp)
+
+configure_file(input_14 input_14 COPYONLY)
+configure_file(input_14_test input_14_test COPYONLY)
+add_executable(AoC_2021_day_14 day_14.cpp)
