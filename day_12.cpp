@@ -6,9 +6,14 @@
 #include <fstream>
 #include <utility>
 #include <vector>
+#include <concurrent_vector.h>
 #include <string>
 #include <algorithm>
+#include <execution>
+#include <chrono>
 #include <regex>
+#include <map>
+#include <set>
 
 enum caveType {
     LARGE,
@@ -18,10 +23,11 @@ enum caveType {
 };
 
 struct Cave {
-    Cave(std::string _name, caveType _type) : name(std::move(_name)), type(_type) {}
     std::string name;
     caveType type;
     std::vector<std::string> connections;
+    explicit Cave(std::string _name = "", caveType _type = LARGE) :
+            name(std::move(_name)), type(_type), connections(std::vector<std::string>()) {}
 };
 
 Cave makeCave(const std::string& caveName) {
@@ -42,16 +48,10 @@ Cave makeCave(const std::string& caveName) {
     return newCave;
 }
 
-Cave findCaveByName(std::vector<Cave> caves, const std::string& caveName) {
-    auto cave = std::find_if(caves.begin(), caves.end(), [&caveName](auto &cave){ return cave.name == caveName; });
-    return *cave;
-}
-
-std::vector<std::string> getSmallCaves(const std::vector<Cave>& caves, const std::vector<std::string>& route) {
+std::vector<std::string> getSmallCaves(const std::map<std::string, Cave>& caves, const std::vector<std::string>& route) {
     std::vector<std::string> smallCaves;
     for (auto &caveName : route) {
-        Cave cave = findCaveByName(caves, caveName);
-        if (cave.type == SMALL) {
+        if (caves.at(caveName).type == SMALL) {
             smallCaves.push_back(caveName);
         }
     }
@@ -60,7 +60,8 @@ std::vector<std::string> getSmallCaves(const std::vector<Cave>& caves, const std
 }
 
 int main() {
-    std::vector<Cave> caves;
+    const auto startT = std::chrono::high_resolution_clock::now();
+    std::map<std::string, Cave> caves;
     std::ifstream caveFile("input_12");
     std::string line;
     std::smatch match;
@@ -69,25 +70,31 @@ int main() {
         if (std::regex_match(line, match, std::regex("(\\w+)-(\\w+)"))) {
             std::string cave1Name = match[1];
             std::string cave2Name = match[2];
+
+            /*
             if (std::find_if(caves.begin(), caves.end(), [&cave1Name](auto &cave){ return cave.name == cave1Name; }) == caves.end()) {
                 caves.push_back(makeCave(cave1Name));
             }
             if (std::find_if(caves.begin(), caves.end(), [&cave2Name](auto &cave){ return cave.name == cave2Name; }) == caves.end()) {
                 caves.push_back(makeCave(cave2Name));
             }
+             */
 
-            auto cave1 = std::find_if(caves.begin(), caves.end(), [&cave1Name](auto &cave){ return cave.name == cave1Name; });
-            auto cave2 = std::find_if(caves.begin(), caves.end(), [&cave2Name](auto &cave){ return cave.name == cave2Name; });
+            if (!caves.contains(cave1Name)) {
+                caves[cave1Name] = makeCave(cave1Name);
+            }
+            if (!caves.contains(cave2Name)) {
+                caves[cave2Name] = makeCave(cave2Name);
+            }
 
-            cave1->connections.push_back(cave2->name);
-            cave2->connections.push_back(cave1->name);
+            caves.at(cave1Name).connections.push_back(cave2Name);
+            caves.at(cave2Name).connections.push_back(cave1Name);
         }
     }
 
-    Cave startCave = findCaveByName(caves, "start");
-    Cave endCave = findCaveByName(caves, "end");
+    Cave startCave = caves["start"];
 
-    std::vector<std::vector<std::string>> routes;
+    Concurrency::concurrent_vector<std::vector<std::string>> routes;
 
     for (auto &con : startCave.connections) {
         std::vector<std::string> route;
@@ -97,17 +104,17 @@ int main() {
 
     bool allRoutesComplete = false;
 
-    std::vector<std::vector<std::string>> newRoutes;
+    Concurrency::concurrent_vector<std::vector<std::string>> newRoutes;
 
     while (!allRoutesComplete) {
         allRoutesComplete = true;
         for (auto &route : routes) {
-            auto cave = findCaveByName(caves, route.back());
+            auto cave = caves.at(route.back());
             if (cave.type == END) {
                 newRoutes.push_back(route);
             } else {
                 for (auto &con : cave.connections) {
-                    auto conCave = findCaveByName(caves, con);
+                    auto conCave = caves.at(con);
                     if (conCave.type != START) {
                         if (conCave.type == LARGE || conCave.type == END) {
                             std::vector<std::string> newRoute;
@@ -136,6 +143,10 @@ int main() {
 
     std::cout << "Routes: " << routes.size() << std::endl;
 
+    const auto endT = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT) << std::endl;
+
     // part 2
 
     allRoutesComplete = false;
@@ -151,14 +162,15 @@ int main() {
     while (!allRoutesComplete) {
         allRoutesComplete = true;
         std::cout << " : " << routes.size() << std::endl;
+
         for (auto &route : routes) {
-            auto cave = findCaveByName(caves, route.back());
+            auto cave = caves.at(route.back());
             if (cave.type == END) {
                 newRoutes.push_back(route);
             } else {
                 for (auto &con : cave.connections) {
                     bool shouldAdd = false;
-                    auto conCave = findCaveByName(caves, con);
+                    auto conCave = caves.at(con);
 
                     if (conCave.type != START) {
                         if (conCave.type == LARGE || conCave.type == END) {
@@ -199,6 +211,10 @@ int main() {
     }
 
     std::cout << "Routes: " << routes.size() << std::endl;
+
+    auto endT2 = std::chrono::high_resolution_clock::now();
+
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT2 - startT) << std::endl;
 
     return 0;
 }
