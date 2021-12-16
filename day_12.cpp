@@ -6,14 +6,13 @@
 #include <fstream>
 #include <utility>
 #include <vector>
-#include <concurrent_vector.h>
 #include <string>
 #include <algorithm>
 #include <execution>
 #include <chrono>
 #include <regex>
 #include <map>
-#include <set>
+
 
 enum caveType {
     LARGE,
@@ -94,7 +93,7 @@ int main() {
 
     Cave startCave = caves["start"];
 
-    Concurrency::concurrent_vector<std::vector<std::string>> routes;
+    std::vector<std::vector<std::string>> routes;
 
     for (auto &con : startCave.connections) {
         std::vector<std::string> route;
@@ -104,7 +103,7 @@ int main() {
 
     bool allRoutesComplete = false;
 
-    Concurrency::concurrent_vector<std::vector<std::string>> newRoutes;
+    std::vector<std::vector<std::string>> newRoutes;
 
     while (!allRoutesComplete) {
         allRoutesComplete = true;
