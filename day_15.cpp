@@ -33,11 +33,33 @@ int heuristic(std::pair<int, int> a, std::pair<int, int> b) {
     return std::abs(a.first - b.first) + std::abs(a.second - b.second);
 }
 
+int heuristic2(std::pair<int, int> a, std::pair<int, int> b) {
+    int ab = a.first - b.first;
+    int bc = a.second - b.second;
+    return (int)std::sqrt(ab*ab + bc*bc);
+}
+
 struct comp {
     bool operator()(const std::pair<std::pair<int, int>, int> a, std::pair<std::pair<int, int>, int> b) {
         return a.second > b.second;
     }
 };
+
+std::vector<std::pair<int, int>> retracePath(const std::map<std::pair<int, int>, std::pair<int, int>>& cameFrom,
+                                             std::pair<int, int> start, std::pair<int, int> goal) {
+    auto current = goal;
+    std::vector<std::pair<int, int>> path;
+    path.push_back(current);
+
+    while (current != start) {
+        current = cameFrom.at(current);
+        path.push_back(current);
+    }
+
+    path.pop_back();
+
+    return path;
+}
 
 std::vector<std::pair<int, int>> aStarSearch(const std::vector<std::vector<int>> &map) {
     int max = (int)map.size();
@@ -64,7 +86,7 @@ std::vector<std::pair<int, int>> aStarSearch(const std::vector<std::vector<int>>
 
         for (auto &next : getGridNeighbours(current, max)) {
             int newCost = costSoFar[current] + map[current.second][current.first];
-            if (!costSoFar.contains(next) || newCost < costSoFar[next]) {
+            if (!costSoFar.contains(next) || newCost < costSoFar.at(next)) {
                 costSoFar[next] = newCost;
                 int priority = newCost + heuristic(goal, next);
                 frontier.emplace(next, priority);
@@ -73,16 +95,46 @@ std::vector<std::pair<int, int>> aStarSearch(const std::vector<std::vector<int>>
         }
     }
 
-    auto current = goal;
-    std::vector<std::pair<int, int>> path;
-    path.push_back(current);
+    auto path = retracePath(cameFrom, start, goal);
 
-    while (current != start) {
-        current = cameFrom[current];
-        path.push_back(current);
+    return path;
+}
+
+std::vector<std::pair<int, int>> dijkstraSearch(const std::vector<std::vector<int>> &map) {
+    int max = (int)map.size();
+    auto start = std::make_pair(0, 0);
+    auto goal = std::make_pair(max - 1, max - 1);
+
+
+
+    std::priority_queue<std::pair<std::pair<int, int>, int>, std::vector<std::pair<std::pair<int, int>, int>>, comp> frontier;
+    frontier.emplace(start, 0);
+
+    std::map<std::pair<int, int>, std::pair<int, int>> cameFrom;
+    std::map<std::pair<int, int>, int> costSoFar;
+    cameFrom[start] = start;
+    costSoFar[start] = 0;
+
+    while (!frontier.empty()) {
+        auto current = frontier.top().first;
+        frontier.pop();
+
+        if (current == goal) {
+            break;
+        }
+
+        for (auto &next : getGridNeighbours(current, max)) {
+            int newCost = costSoFar[current] + map[current.second][current.first];
+            if (!costSoFar.contains(next) || newCost < costSoFar.at(next)) {
+                costSoFar[next] = newCost;
+                int priority = newCost;
+                frontier.emplace(next, priority);
+                cameFrom[next] = current;
+            }
+        }
     }
 
-    path.pop_back();
+    auto path = retracePath(cameFrom, start, goal);
 
     return path;
 }
@@ -101,7 +153,7 @@ int main() {
         map.push_back(mapLine);
     }
 
-    auto path = aStarSearch(map);
+    auto path = dijkstraSearch(map);
 
     int totalRisk = std::accumulate(path.begin(), path.end(), 0,
                                     [&map](int risk, auto pos){ return risk += map[pos.second][pos.first]; });
@@ -150,7 +202,8 @@ int main() {
 
     map = newMap;
 
-    path = aStarSearch(map);
+    path = dijkstraSearch(map);
+
     totalRisk = std::accumulate(path.begin(), path.end(), 0,
                                 [&map](int risk, auto pos){ return risk += map[pos.second][pos.first]; });
     std::cout << "Total Risk 2: " << totalRisk << std::endl;
