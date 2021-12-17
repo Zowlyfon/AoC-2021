@@ -56,5 +56,5 @@ configure_file(input_16 input_16 COPYONLY)
 configure_file(input_16_test input_16_test COPYONLY)
 add_executable(AoC_2021_day_16 day_16.cpp)
 
-configure_file(find_triangles_input find_triangles_input COPYONLY)
-add_executable(Find_Triangles find_triangles.cpp)
+configure_file(input_17 input_17 COPYONLY)
+add_executable(AoC_2021_day_17 day_17.cpp)
