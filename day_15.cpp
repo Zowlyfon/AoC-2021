@@ -47,6 +47,7 @@ struct comp {
 
 std::vector<std::pair<int, int>> retracePath(const std::map<std::pair<int, int>, std::pair<int, int>>& cameFrom,
                                              std::pair<int, int> start, std::pair<int, int> goal) {
+    auto startT = std::chrono::high_resolution_clock::now();
     auto current = goal;
     std::vector<std::pair<int, int>> path;
     path.push_back(current);
@@ -57,7 +58,8 @@ std::vector<std::pair<int, int>> retracePath(const std::map<std::pair<int, int>,
     }
 
     path.pop_back();
-
+    auto endT = std::chrono::high_resolution_clock::now();
+    std::cout << "Path Retrace Time: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT) << std::endl;
     return path;
 }
 
