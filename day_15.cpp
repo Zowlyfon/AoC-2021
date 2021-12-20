@@ -11,6 +11,7 @@
 #include <map>
 #include <numeric>
 #include <chrono>
+#include <cmath>
 
 std::vector<std::pair<int, int>> getGridNeighbours(std::pair<int, int> pos, int max) {
     std::vector<std::pair<int, int>> neighbours;
@@ -59,7 +60,7 @@ std::vector<std::pair<int, int>> retracePath(const std::map<std::pair<int, int>,
 
     path.pop_back();
     auto endT = std::chrono::high_resolution_clock::now();
-    std::cout << "Path Retrace Time: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT) << std::endl;
+    std::cout << "Path Retrace Time: " << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT).count() << std::endl;
     return path;
 }
 
@@ -163,7 +164,7 @@ int main() {
     std::cout << "Total Risk: " << totalRisk << std::endl;
 
     const auto endT = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT) << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT).count() << std::endl;
 
     // part 2;
 
@@ -211,7 +212,7 @@ int main() {
     std::cout << "Total Risk 2: " << totalRisk << std::endl;
 
     const auto endT2 = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT2 - startT) << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT2 - startT).count() << std::endl;
 
     return 0;
 }

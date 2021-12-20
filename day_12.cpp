@@ -49,11 +49,11 @@ Cave makeCave(const std::string& caveName) {
 
 std::vector<std::string> getSmallCaves(const std::map<std::string, Cave>& caves, const std::vector<std::string>& route) {
     std::vector<std::string> smallCaves;
-    for (auto &caveName : route) {
-        if (caves.at(caveName).type == SMALL) {
-            smallCaves.push_back(caveName);
-        }
-    }
+    smallCaves.reserve(route.size());
+    std::copy_if(route.begin(), route.end(), std::back_inserter(smallCaves),
+                 [&caves](auto &caveName){
+        return caves.at(caveName).type == SMALL;
+    });
 
     return smallCaves;
 }
@@ -144,7 +144,7 @@ int main() {
 
     const auto endT = std::chrono::high_resolution_clock::now();
 
-    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT) << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT).count() << std::endl;
 
     // part 2
 
@@ -213,7 +213,7 @@ int main() {
 
     auto endT2 = std::chrono::high_resolution_clock::now();
 
-    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT2 - startT) << std::endl;
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT2 - startT).count() << std::endl;
 
     return 0;
 }
