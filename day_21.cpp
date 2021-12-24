@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <chrono>
 
 class DeterministicDie {
 private:
@@ -66,6 +67,7 @@ int main() {
     std::cout << "High Score * Rolls: " << players.back().score * die.numRolls() << std::endl;
 
     // part 2
+    const auto startT = std::chrono::high_resolution_clock::now();
     // 3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1
     std::vector<std::pair<int, int>> rolls {
         std::make_pair(3, 1),
@@ -114,6 +116,8 @@ int main() {
         }
         states = newStates;
     }
+    const auto endT = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(endT - startT).count() << std::endl;
 
     std::cout << "Player 1 Universes Won: " << universesWon[0] << std::endl;
     std::cout << "Player 2 Universes Won: " << universesWon[1] << std::endl;
